@@ -131,7 +131,7 @@ async function handler(ctx) {
                             lang: 'zh',
                             img: matches[3],
                             uc: matches[2],
-                            floor: 800,
+                            floor: Math.floor(1e3 * Math.random() + 1),
                         },
                         headers: {
                             Referer: item.link,
@@ -164,21 +164,21 @@ async function handler(ctx) {
 
                 // If the video is not western, go fetch preview.
 
-                if (!isWestern) {
-                    try {
-                        const avgleResponse = await got({
-                            method: 'get',
-                            url: `https://api.avgle.com/v1/jav/${item.guid}/0`,
-                        });
+                // if (!isWestern) {
+                //     try {
+                //         const avgleResponse = await got({
+                //             method: 'get',
+                //             url: `https://api.avgle.com/v1/jav/${item.guid}/0`,
+                //         });
 
-                        // full video
-                        videoSrc = avgleResponse.data.response.videos[0]?.embedded_url ?? '';
-                        // video preview
-                        videoPreview = avgleResponse.data.response.videos[0]?.preview_video_url ?? '';
-                    } catch {
-                        // no-empty
-                    }
-                }
+                //         // full video
+                //         videoSrc = avgleResponse.data.response.videos[0]?.embedded_url ?? '';
+                //         // video preview
+                //         videoPreview = avgleResponse.data.response.videos[0]?.preview_video_url ?? '';
+                //     } catch {
+                //         // no-empty
+                //     }
+                // }
 
                 item.author = cacheIn.author;
                 item.title = cacheIn.title;
