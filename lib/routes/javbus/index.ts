@@ -77,16 +77,18 @@ async function handler(ctx) {
                 link: item.attr('href'),
                 guid: item.find('date').first().text(),
                 pubDate: parseDate(item.find('date').last().text()),
+                title:item.find('img').attr('title')
             };
         });
 
-    items = await Promise.all(
-        items.map((item) =>
+        let get=(item) =>
             cache.tryGet(item.link, async () => {
+            	console.log("get start：",item.link,)
                 const detailResponse = await got({
                     method: 'get',
                     url: item.link,
                     headers,
+                    retryDelay:3000
                 });
 
                 const content = load(detailResponse.data);
@@ -136,6 +138,7 @@ async function handler(ctx) {
                         headers: {
                             Referer: item.link,
                         },
+                        retryDelay:3000
                     });
 
                     const content = load(`<table>${magnetResponse.data}</table>`);
@@ -162,26 +165,8 @@ async function handler(ctx) {
                     // no-empty
                 }
 
-                // If the video is not western, go fetch preview.
-
-                // if (!isWestern) {
-                //     try {
-                //         const avgleResponse = await got({
-                //             method: 'get',
-                //             url: `https://api.avgle.com/v1/jav/${item.guid}/0`,
-                //         });
-
-                //         // full video
-                //         videoSrc = avgleResponse.data.response.videos[0]?.embedded_url ?? '';
-                //         // video preview
-                //         videoPreview = avgleResponse.data.response.videos[0]?.preview_video_url ?? '';
-                //     } catch {
-                //         // no-empty
-                //     }
-                // }
-
                 item.author = cacheIn.author;
-                item.title = cacheIn.title;
+                //item.title = cacheIn.title;
                 item.category = cacheIn.category;
                 item.description = art(path.join(__dirname, 'templates/description.art'), {
                     info: cacheIn.info,
@@ -190,14 +175,14 @@ async function handler(ctx) {
                     videoSrc,
                     videoPreview,
                 });
-
                 return item;
             })
-        )
-    );
+        
+        for(let item of items){
+	        await get(item);
+        }
 
     const title = $('head title').text();
-
     return {
         title: `${title.startsWith('JavBus') ? '' : 'JavBus - '}${title.replace(/ - AV磁力連結分享/, '')}`,
         link: currentUrl,
