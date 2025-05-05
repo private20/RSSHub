@@ -83,7 +83,6 @@ async function handler(ctx) {
 
         let get=(item) =>
             cache.tryGet(item.link, async () => {
-            	console.log("get start：",item.link,)
                 const detailResponse = await got({
                     method: 'get',
                     url: item.link,
